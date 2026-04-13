@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
 import sqlite3
 
 app = Flask(__name__)
@@ -21,11 +21,6 @@ def init_db():
 def home():
     return render_template('index.html')
 
-if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
-    from flask import request, redirect
-
 @app.route('/add', methods=['POST'])
 def add_coursework():
     title = request.form['title']
@@ -34,13 +29,15 @@ def add_coursework():
 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-
     cursor.execute(
         "INSERT INTO coursework (title, description, due_date) VALUES (?, ?, ?)",
         (title, description, due_date)
     )
-
     conn.commit()
     conn.close()
 
     return redirect('/')
+
+if __name__ == '__main__':
+    init_db()
+    app.run(debug=True)
