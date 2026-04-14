@@ -45,8 +45,12 @@
                         <td>{{ item[2] }}</td>
                         <td>{{ item[3] }}</td>
                         <td>
-    <a href="/delete/{{ item[0] }}">
-        <button>Delete</button>
+    <a href="/edit/{{ item[0] }}">
+        <button type="button">Edit</button>
+    </a>
+
+    <a href="/delete/{{ item[0] }}" onclick="return confirm('Are you sure?')">
+        <button type="button">Delete</button>
     </a>
 </td>
                     </tr>
