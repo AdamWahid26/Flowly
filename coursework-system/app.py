@@ -25,8 +25,6 @@ def home():
     coursework_list = cursor.fetchall()
     conn.close()
 
-    print("DEBUG coursework_list:", coursework_list)
-
     return render_template('index.html', coursework_list=coursework_list)
 
 @app.route('/add', methods=['POST'])
