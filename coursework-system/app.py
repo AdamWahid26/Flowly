@@ -54,6 +54,7 @@ def delete_coursework(id):
     conn.close()
 
     return redirect('/')
+
 @app.route('/edit/<int:id>')
 def edit_coursework(id):
     conn = sqlite3.connect('database.db')
