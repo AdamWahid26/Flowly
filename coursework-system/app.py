@@ -54,6 +54,33 @@ def delete_coursework(id):
     conn.close()
 
     return redirect('/')
+@app.route('/edit/<int:id>')
+def edit_coursework(id):
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM coursework WHERE id = ?", (id,))
+    coursework = cursor.fetchone()
+    conn.close()
+
+    return render_template('edit.html', coursework=coursework)
+
+@app.route('/update/<int:id>', methods=['POST'])
+def update_coursework(id):
+    title = request.form['title']
+    description = request.form['description']
+    due_date = request.form['due_date']
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE coursework
+        SET title = ?, description = ?, due_date = ?
+        WHERE id = ?
+    """, (title, description, due_date, id))
+    conn.commit()
+    conn.close()
+
+    return redirect('/')
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
