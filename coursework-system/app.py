@@ -43,7 +43,17 @@ def add_coursework():
     conn.close()
 
     return redirect('/')
+@app.route('/delete/<int:id>')
+def delete_coursework(id):
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
 
+    cursor.execute("DELETE FROM coursework WHERE id = ?", (id,))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/')
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
