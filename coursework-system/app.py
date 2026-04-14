@@ -19,7 +19,15 @@ def init_db():
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM coursework")
+    coursework_list = cursor.fetchall()
+    conn.close()
+
+    print("DEBUG coursework_list:", coursework_list)
+
+    return render_template('index.html', coursework_list=coursework_list)
 
 @app.route('/add', methods=['POST'])
 def add_coursework():
