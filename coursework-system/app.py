@@ -21,7 +21,7 @@ def init_db():
 def home():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM coursework")
+    cursor.execute("SELECT * FROM coursework ORDER BY due_date ASC")
     coursework_list = cursor.fetchall()
     conn.close()
 
