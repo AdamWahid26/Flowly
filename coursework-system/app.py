@@ -36,7 +36,7 @@ def home():
     conn.close()
 
     return render_template('index.html', coursework_list=coursework_list)
-
+#PART 4 - ADDING, DELETING AND EDITING COURSEWORK
 @app.route('/add', methods=['POST'])
 def add_coursework():
     title = request.form['title']
