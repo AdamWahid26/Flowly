@@ -3,35 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <title>Flowly Dashboard</title>
+
+  <!-- Link CSS file -->
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
+<!-- ================= MAIN TITLE ================= -->
 <h1>📚 Flowly - Group Dashboard</h1>
 
-<!-- Add Member -->
+<!-- ================= ADD MEMBER SECTION ================= -->
 <div class="card">
   <h2>Add Group Member</h2>
+
+  <!-- Input fields -->
   <input type="text" id="name" placeholder="Name">
   <input type="email" id="email" placeholder="Email">
   <input type="text" id="role" placeholder="Role">
+
+  <!-- Button triggers JS function -->
   <button onclick="addMember()">Add Member</button>
 </div>
 
-<!-- Add Coursework -->
+<!-- ================= ADD COURSEWORK SECTION ================= -->
 <div class="card">
   <h2>Add Coursework</h2>
+
   <input type="text" id="coursework" placeholder="Coursework Title">
   <input type="date" id="deadline">
+
   <button onclick="addCoursework()">Add Coursework</button>
 </div>
 
-<!-- Dashboard -->
+<!-- ================= DASHBOARD SECTION ================= -->
 <div class="card">
   <h2>Upcoming Due</h2>
+
+  <!-- Data from backend will appear here -->
   <div id="dashboard"></div>
 </div>
 
+<!-- Link JavaScript -->
 <script src="script.js"></script>
+
 </body>
 </html>
