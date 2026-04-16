@@ -1,11 +1,11 @@
 body {
     font-family: Arial, sans-serif;
     margin: 40px;
-    background-color: #d9ff01;
+    background-color: #BDDDDC; /* light background */
 }
 
 h1, h2 {
-    color: #000000;
+    color: #384959; /* dark text for clarity */
 }
 
 .main-container {
@@ -23,10 +23,11 @@ h1, h2 {
 }
 
 form {
-    background: rgb(57, 220, 144);
+    background: #6A89A7; /* medium blue */
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    color: white; /* make text readable */
 }
 
 input, textarea, button {
@@ -36,27 +37,36 @@ input, textarea, button {
     box-sizing: border-box;
 }
 
+input, textarea {
+    background-color: #BDDDDC;
+    border: none;
+}
+
 button {
     cursor: pointer;
-    background-color: #efefef;
-    color: rgb(0, 0, 0);
+    background-color: #384959; /* dark button */
+    color: white;
     border: none;
+}
+
+button:hover {
+    background-color: #88BDF2; /* hover effect */
 }
 
 table {
     width: 100%;
-    background: rgb(6, 230, 255);
+    background: #88BDF2; /* light blue */
     border-collapse: collapse;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 th, td {
-    border: 1px solid #000000;
+    border: 1px solid #384959;
     padding: 12px;
     text-align: left;
 }
 
 th {
-    background-color: #333;
+    background-color: #384959; /* dark header */
     color: white;
 }
