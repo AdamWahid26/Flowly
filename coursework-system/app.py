@@ -1,8 +1,13 @@
+#PART 1 -IMPORTING TOOLS
+# importing tools from flask,
+# render_templates allows to SHOW HTML PAGE,
+# request is for input from user 
+# REDIRECT is to go to another page
+#Bring in database tool (SQLite)
 from flask import Flask, render_template, request, redirect
 import sqlite3
-
 app = Flask(__name__)
-
+# ---------------------------------------------------------------------------------------------------------Initialize the database
 def init_db():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
