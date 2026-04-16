@@ -7,10 +7,13 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
 app = Flask(__name__)
-# ---------------------------------------------------------------------------------------------------------Initialize the database
-def init_db():
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
+#PART 2 - DATABASE FUNCTIONS
+#create database structure
+#connect to database
+#create table if it doesn't exist
+def init_db():#initialise database
+    conn = sqlite3.connect('database.db')#connect to database
+    cursor = conn.cursor()#Prepare tool to send SQL commands
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS coursework (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +24,9 @@ def init_db():
     ''')
     conn.commit()
     conn.close()
-
+#PART 3 - DISPLAY SYSTEM
+#Fetch all coursework from database and display on homepage
+#also sort by due date (ASC = earliest first)
 @app.route('/')
 def home():
     conn = sqlite3.connect('database.db')
