@@ -5,7 +5,7 @@ body {
 }
 
 h1, h2 {
-    color: #333;
+    color: #000000;
 }
 
 .main-container {
@@ -23,7 +23,7 @@ h1, h2 {
 }
 
 form {
-    background: rgb(94, 14, 14);
+    background: rgb(57, 220, 144);
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -38,14 +38,14 @@ input, textarea, button {
 
 button {
     cursor: pointer;
-    background-color: #000000;
-    color: rgb(255, 254, 254);
+    background-color: #efefef;
+    color: rgb(0, 0, 0);
     border: none;
 }
 
 table {
     width: 100%;
-    background: rgb(11, 4, 99);
+    background: rgb(6, 230, 255);
     border-collapse: collapse;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
