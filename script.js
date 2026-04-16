@@ -9,7 +9,7 @@ function addMember() {
   let role = document.getElementById("role").value;
 
   // Send data to Flask backend
-  fetch("http://127.0.0.1:5500/add_member", {
+  fetch("http://127.0.0.1:5000/add_member", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
