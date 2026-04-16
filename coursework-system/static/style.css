@@ -1,11 +1,12 @@
 body {
     font-family: Arial, sans-serif;
     margin: 40px;
-    background-color: #BDDDDC; /* light background */
+    background-color: #121212; /* near black */
+    color: #e0e0e0; /* light grey text */
 }
 
 h1, h2 {
-    color: #384959; /* dark text for clarity */
+    color: #ffffff; /* pure white for headings */
 }
 
 .main-container {
@@ -23,11 +24,10 @@ h1, h2 {
 }
 
 form {
-    background: #6A89A7; /* medium blue */
+    background: #1e1e1e; /* dark grey */
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    color: white; /* make text readable */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 input, textarea, button {
@@ -38,35 +38,41 @@ input, textarea, button {
 }
 
 input, textarea {
-    background-color: #BDDDDC;
-    border: none;
+    background-color: #2a2a2a; /* slightly lighter grey */
+    color: #ffffff;
+    border: 1px solid #444;
 }
 
 button {
     cursor: pointer;
-    background-color: #384959; /* dark button */
-    color: white;
+    background-color: #ffffff; /* white button */
+    color: #121212; /* dark text */
     border: none;
+    font-weight: bold;
 }
 
 button:hover {
-    background-color: #88BDF2; /* hover effect */
+    background-color: #cccccc; /* hover grey */
 }
 
 table {
     width: 100%;
-    background: #88BDF2; /* light blue */
+    background: #1e1e1e;
     border-collapse: collapse;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 th, td {
-    border: 1px solid #384959;
+    border: 1px solid #444;
     padding: 12px;
     text-align: left;
 }
 
 th {
-    background-color: #384959; /* dark header */
-    color: white;
+    background-color: #2a2a2a;
+    color: #ffffff;
+}
+
+tr:nth-child(even) {
+    background-color: #181818;
 }
