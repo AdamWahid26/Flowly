@@ -71,7 +71,7 @@ def add_coursework():
 
     return redirect('/')
 
-
+#blabla
 @app.route('/delete/<int:id>')
 def delete_coursework(id):
     conn = sqlite3.connect('database.db')
