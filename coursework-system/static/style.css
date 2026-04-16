@@ -1,7 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     margin: 40px;
-    background-color: #f4f4f4;
+    background-color: #7f1717;
 }
 
 h1, h2 {
@@ -23,7 +23,7 @@ h1, h2 {
 }
 
 form {
-    background: white;
+    background: rgb(94, 14, 14);
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -38,20 +38,20 @@ input, textarea, button {
 
 button {
     cursor: pointer;
-    background-color: #333;
-    color: white;
+    background-color: #000000;
+    color: rgb(255, 254, 254);
     border: none;
 }
 
 table {
     width: 100%;
-    background: white;
+    background: rgb(11, 4, 99);
     border-collapse: collapse;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 th, td {
-    border: 1px solid #ccc;
+    border: 1px solid #000000;
     padding: 12px;
     text-align: left;
 }
