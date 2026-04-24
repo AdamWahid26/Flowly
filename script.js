@@ -1,98 +1,103 @@
 // ==============================
-// ADD GROUP MEMBER
+// BASE URL (Flask backend)
+// ==============================
+const BASE_URL = "http://127.0.0.1:5000";
+
+
+// ==============================
+// ADD MEMBER
 // ==============================
 function addMember() {
 
-  // Get values from input fields
-  let name = document.getElementById("name").value;
-  let email = document.getElementById("email").value;
-  let role = document.getElementById("role").value;
+    // Get values from input fields
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const role = document.getElementById("role").value;
+    const coursework_id = document.getElementById("coursework_id").value;
 
-  // Send data to Flask backend
-  fetch("http://127.0.0.1:5000/add_member", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-
-    body: JSON.stringify({
-      name: name,
-      email: email,
-      role: role,
-      coursework_id: 1  // default link
+    // Send data to Flask backend
+    fetch(`${BASE_URL}/add_member`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name,
+            email: email,
+            role: role,
+            coursework_id: parseInt(coursework_id)
+        })
     })
-  })
+    .then(res => res.json())
+    .then(data => {
+        alert("✅ Member Added!");
 
-  .then(res => res.json())
-  .then(data => {
-    alert(data.message); // show success message
-  });
+        // Clear inputs after submit (important UX fix)
+        document.getElementById("name").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("role").value = "";
+        document.getElementById("coursework_id").value = "";
+
+        console.log(data);
+    })
+    .catch(err => console.error(err));
 }
 
 
 // ==============================
-// ADD COURSEWORK
+// LOAD UPCOMING TASKS
 // ==============================
-function addCoursework() {
+function loadUpcoming() {
 
-  let title = document.getElementById("coursework").value;
-  let deadline = document.getElementById("deadline").value;
-
-  // Send to backend
-  fetch("http://127.0.0.1:5000/add_coursework", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-
-    body: JSON.stringify({
-      title: title,
-      due_date: deadline
-    })
-  })
-
-  .then(res => res.json())
-  .then(data => {
-    alert(data.message);
-    loadDashboard(); // refresh dashboard after adding
-  });
-}
-
-
-// ==============================
-// LOAD DASHBOARD FROM BACKEND
-// ==============================
-function loadDashboard() {
-
-  fetch("http://127.0.0.1:5000/upcoming")
+    fetch(`${BASE_URL}/upcoming`)
     .then(res => res.json())
     .then(data => {
 
-      let dashboard = document.getElementById("dashboard");
-      dashboard.innerHTML = ""; // clear old content
+        const list = document.getElementById("taskList");
+        list.innerHTML = "";
 
-      // Loop through tasks
-      data.forEach(cw => {
+        data.forEach(task => {
 
-        let div = document.createElement("div");
+            const li = document.createElement("li");
 
-        // highlight urgent tasks
-        div.className = cw.days_left <= 3 ? "urgent" : "normal";
+            // Show task info
+            li.textContent = `${task.title} (${task.days_left} days left)`;
 
-        // display content
-        div.innerHTML = `
-          <h3>${cw.title}</h3>
-          <p>Deadline: ${cw.due_date}</p>
-          <p>Days left: ${cw.days_left}</p>
-        `;
+            // FIXED BUG: use "status" not "deadline_status"
+            if (task.status === "URGENT ⚠️") {
+                li.classList.add("urgent");
+            } else {
+                li.classList.add("normal");
+            }
 
-        dashboard.appendChild(div);
-      });
-    });
+            list.appendChild(li);
+        });
+    })
+    .catch(err => console.error(err));
 }
 
 
 // ==============================
-// AUTO LOAD WHEN PAGE OPENS
+// LOAD ALERTS (URGENT TASKS)
 // ==============================
-window.onload = loadDashboard;
+function loadAlerts() {
+
+    fetch(`${BASE_URL}/alerts`)
+    .then(res => res.json())
+    .then(data => {
+
+        const list = document.getElementById("alertList");
+        list.innerHTML = "";
+
+        data.forEach(task => {
+
+            const li = document.createElement("li");
+
+            li.textContent = `${task.title} ⚠️ Due in ${task.days_left} days`;
+            li.classList.add("urgent");
+
+            list.appendChild(li);
+        });
+    })
+    .catch(err => console.error(err));
+}

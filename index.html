@@ -1,51 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Flowly Dashboard</title>
+    <meta charset="UTF-8">
+    <title>Flowly Dashboard</title>
 
-  <!-- Link CSS file -->
-  <link rel="stylesheet" href="style.css">
+    <!-- Link CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- ================= MAIN TITLE ================= -->
-<h1>📚 Flowly - Group Dashboard</h1>
+    <h1>📋 Flowly Dashboard</h1>
 
-<!-- ================= ADD MEMBER SECTION ================= -->
-<div class="card">
-  <h2>Add Group Member</h2>
+    <!-- ==============================
+         ADD MEMBER FORM
+    ============================== -->
+    <div class="card">
+        <h2>Add Group Member</h2>
 
-  <!-- Input fields -->
-  <input type="text" id="name" placeholder="Name">
-  <input type="email" id="email" placeholder="Email">
-  <input type="text" id="role" placeholder="Role">
+        <input type="text" id="name" placeholder="Name">
+        <input type="email" id="email" placeholder="Email">
+        <input type="text" id="role" placeholder="Role">
+        <input type="number" id="coursework_id" placeholder="Coursework ID">
 
-  <!-- Button triggers JS function -->
-  <button onclick="addMember()">Add Member</button>
-</div>
+        <button onclick="addMember()">Add Member</button>
+    </div>
 
-<!-- ================= ADD COURSEWORK SECTION ================= -->
-<div class="card">
-  <h2>Add Coursework</h2>
+    <!-- ==============================
+         UPCOMING TASKS
+    ============================== -->
+    <div class="card">
+        <h2>📅 Upcoming Coursework</h2>
+        <button onclick="loadUpcoming()">Refresh</button>
+        <ul id="taskList"></ul>
+    </div>
 
-  <input type="text" id="coursework" placeholder="Coursework Title">
-  <input type="date" id="deadline">
+    <!-- ==============================
+         ALERTS
+    ============================== -->
+    <div class="card">
+        <h2>⚠️ Urgent Tasks</h2>
+        <button onclick="loadAlerts()">Check Alerts</button>
+        <ul id="alertList"></ul>
+    </div>
 
-  <button onclick="addCoursework()">Add Coursework</button>
-</div>
-
-<!-- ================= DASHBOARD SECTION ================= -->
-<div class="card">
-  <h2>Upcoming Due</h2>
-
-  <!-- Data from backend will appear here -->
-  <div id="dashboard"></div>
-</div>
-
-<!-- Link JavaScript -->
-<script src="script.js"></script>
+    <!-- Link JS -->
+    <script src="script.js"></script>
 
 </body>
 </html>
