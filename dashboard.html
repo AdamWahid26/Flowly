@@ -16,54 +16,61 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px 30px;
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
+    background: rgb(116, 191, 218);
+    border-bottom: 1px solid #000000;
   }
 
   .nav-left {
     display: flex;
     align-items: center;
-    gap: 25px;
+    gap: 250px;
   }
 
   .nav-item {
     cursor: pointer;
     font-weight: 500;
-    color: #475569;
+    color: #000000;
   }
 
   .nav-item.active {
-    color: #3b82f6;
+    color: #000000;
     font-weight: bold;
-    border-bottom: 2px solid #3b82f6;
-    padding-bottom: 5px;
+    
+    
   }
 
   /* PROFILE */
   .profile {
     position: relative;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 15px;
   }
 
   .profile-menu {
+    font: arial;
+    border: 2px solid black;
     display: none;
     position: absolute;
     right: 0;
     top: 35px;
-    background: white;
-    border-radius: 8px;
+    background: rgb(255, 255, 255);
+    border-radius: 19px;
     width: 180px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    box-shadow: 7px 13px 15px -1px rgba(0, 0, 0, 0.15);
+    
   }
 
   .profile-menu div {
     padding: 12px;
     cursor: pointer;
+    border-radius: 19px;
   }
 
   .profile-menu div:hover {
-    background: #f1f5f9;
+    background: #6fa0d0;
+    color: white;
+    border-radius: 19px;
+    border: 2px solid black;
   }
 
   /* DASHBOARD */
@@ -77,11 +84,12 @@
   }
 
   .card {
+    border: 2px solid black;
     flex: 1;
     background: white;
     padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    box-shadow: 7px 13px 15px -1px rgba(0, 0, 0, 0.42);
+    border-radius: 10px;
     min-height: 220px;
   }
 
