@@ -7,209 +7,166 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #f8fafc, #dbeafe, #e0f2fe);
+      background: #f8fafc;
     }
 
-    /* Background shapes */
-    .bg-shape {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(80px);
-      z-index: 0;
-    }
-
-    .shape1 {
-      width: 300px;
-      height: 300px;
-      background: #93c5fd;
-      top: -50px;
-      left: -50px;
-    }
-
-    .shape2 {
-      width: 300px;
-      height: 300px;
-      background: #bfdbfe;
-      bottom: -50px;
-      right: -50px;
-    }
-
-    /* Navbar */
+    /* NAVBAR */
     .navbar {
-      position: relative;
-      z-index: 1;
       display: flex;
       justify-content: space-between;
-      padding: 20px 40px;
-    }
-
-    .logo {
-      font-weight: bold;
-      font-size: 20px;
-      color: #1e293b;
-    }
-
-    .logout-btn {
-      background: #ef4444;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    /* Container */
-    .container {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: 40px auto;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(10px);
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      color: #1e293b;
-      margin-bottom: 20px;
-    }
-
-    input, select {
-      padding: 10px;
-      margin: 5px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-    }
-
-    button {
-      padding: 10px 15px;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #2563eb;
-    }
-
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 10px;
+      align-items: center;
+      padding: 15px 30px;
+      background: white;
       border-bottom: 1px solid #e2e8f0;
-      text-align: left;
     }
 
-    .delete-btn {
-      background: #ef4444;
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
     }
 
-    /* Status colors */
-    .status-progress { color: orange; }
-    .status-review { color: blue; }
-    .status-complete { color: green; }
+    .nav-item {
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .nav-item.active {
+      color: #3b82f6;
+      font-weight: bold;
+    }
+
+    .profile {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .profile-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 30px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      width: 180px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .profile-menu div {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .profile-menu div:hover {
+      background: #f1f5f9;
+    }
+
+    /* DASHBOARD */
+    .container {
+      padding: 30px;
+    }
+
+    .grid {
+      display: flex;
+      gap: 20px;
+    }
+
+    .card {
+      flex: 1;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+      min-height: 200px;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+
+    /* SAMPLE ITEMS */
+    .item {
+      padding: 8px;
+      margin-top: 5px;
+      background: #f1f5f9;
+      border-radius: 6px;
+    }
 
   </style>
 </head>
 
 <body>
 
-<!-- Background -->
-<div class="bg-shape shape1"></div>
-<div class="bg-shape shape2"></div>
-
-<!-- Navbar -->
+<!-- NAVBAR -->
 <div class="navbar">
-  <div class="logo">StudyTrack</div>
-  <button class="logout-btn" onclick="logout()">Logout</button>
+  <div class="nav-left">
+    <div class="nav-item active" onclick="goHome()">Home</div>
+    <div class="nav-item" onclick="goWork()">Work</div>
+    <div class="nav-item">Calendar</div>
+  </div>
+
+  <div class="profile" onclick="toggleMenu()">
+    👤
+    <div class="profile-menu" id="menu">
+      <div onclick="goProfile()">Profile</div>
+      <div onclick="goSettings()">Settings</div>
+      <div onclick="logout()">Logout</div>
+    </div>
+  </div>
 </div>
 
-<!-- Main -->
+<!-- DASHBOARD -->
 <div class="container">
-  <h2>Coursework Dashboard</h2>
+  <div class="grid">
 
-  <!-- Input Form -->
-  <input type="text" id="subject" placeholder="Subject Name">
-  <input type="text" id="members" placeholder="Group Members (comma separated)">
-  <input type="date" id="dueDate">
+    <!-- TO DO -->
+    <div class="card">
+      <h3>To Do</h3>
+      <div class="item">Math Assignment</div>
+      <div class="item">Group Project</div>
+    </div>
 
-  <select id="status">
-    <option value="In Progress">In Progress</option>
-    <option value="In Review">In Review</option>
-    <option value="Completed">Completed</option>
-  </select>
+    <!-- REMINDER -->
+    <div class="card">
+      <h3>Reminder</h3>
+      <div class="item">Assignment due tomorrow</div>
+      <div class="item">Meeting at 5 PM</div>
+    </div>
 
-  <button onclick="addCoursework()">Add</button>
+    <!-- CALENDAR -->
+    <div class="card">
+      <h3>Calendar</h3>
+      <div class="item">Mon</div>
+      <div class="item">Tue</div>
+      <div class="item">Wed</div>
+    </div>
 
-  <!-- Table -->
-  <table>
-    <thead>
-      <tr>
-        <th>Subject</th>
-        <th>Group Members</th>
-        <th>Due Date</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+  </div>
 </div>
 
 <script>
-let coursework = [];
-
-function addCoursework() {
-  let subject = document.getElementById("subject").value;
-  let members = document.getElementById("members").value;
-  let dueDate = document.getElementById("dueDate").value;
-  let status = document.getElementById("status").value;
-
-  if (!subject || !members || !dueDate) {
-    alert("Please fill all fields");
-    return;
-  }
-
-  coursework.push({ subject, members, dueDate, status });
-  displayCoursework();
+function toggleMenu() {
+  let menu = document.getElementById("menu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
-function displayCoursework() {
-  let table = document.getElementById("tableBody");
-  table.innerHTML = "";
-
-  coursework.forEach((c, index) => {
-    let statusClass = "";
-
-    if (c.status === "In Progress") statusClass = "status-progress";
-    else if (c.status === "In Review") statusClass = "status-review";
-    else if (c.status === "Completed") statusClass = "status-complete";
-
-    table.innerHTML += `
-      <tr>
-        <td>${c.subject}</td>
-        <td>${c.members}</td>
-        <td>${c.dueDate}</td>
-        <td class="${statusClass}">${c.status}</td>
-        <td>
-          <button class="delete-btn" onclick="deleteCoursework(${index})">Delete</button>
-        </td>
-      </tr>
-    `;
-  });
+function goHome() {
+  window.location.href = "dashboard.html";
 }
 
-function deleteCoursework(index) {
-  coursework.splice(index, 1);
-  displayCoursework();
+function goWork() {
+  window.location.href = "work.html";
+}
+
+function goProfile() {
+  window.location.href = "profile.html";
+}
+
+function goSettings() {
+  window.location.href = "settings.html";
 }
 
 function logout() {
