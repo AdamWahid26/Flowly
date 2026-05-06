@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import os  # FIX: added for absolute database path
 
 # ==============================
 # CREATE FLASK APP
@@ -15,7 +16,15 @@ CORS(app)
 # ==============================
 # SQLITE CONFIGURATION
 # ==============================
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///storage.db'
+
+# FIX: get absolute path of current folder (Harith folder)
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+print("DATABASE PATH:", os.path.join(basedir, "database.db"))
+
+# FIX: ensures database.db is always correctly linked
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -59,10 +68,14 @@ class Member(db.Model):
 
 
 # ==============================
-# CREATE DATABASE (RUN ONCE)
+# CREATE DATABASE (RUN ONCE ONLY)
 # ==============================
-with app.app_context():
-    db.create_all()
+# IMPORTANT:
+# Run this ONCE manually or via separate init script, then comment it back.
+
+# with app.app_context():
+#     db.create_all()
+
 
 # ==============================
 # HOME ROUTE
@@ -71,12 +84,13 @@ with app.app_context():
 def home():
     return "Flowly Backend with Proper SQLite Running 🚀"
 
+
 # ==============================
 # ADD MEMBER
 # ==============================
 @app.route("/add_member", methods=["POST"])
 def add_member():
-    data = request.json
+    data = request.get_json()  # FIX: safer than request.json
 
     if not data or "name" not in data:
         return jsonify({"error": "Invalid input"}), 400
@@ -92,6 +106,7 @@ def add_member():
     db.session.commit()
 
     return jsonify({"message": "Member added successfully"})
+
 
 # ==============================
 # GET ALL MEMBERS
@@ -112,16 +127,46 @@ def all_members():
     ])
 
 # ==============================
+# REGISTER ROUTE
+# ==============================
+@app.route("/register", methods=["POST"])
+def register():
+    data = request.get_json()
+
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+
+    if not username or not email or not password:
+        return jsonify({
+            "success": False,
+            "message": "Missing fields"
+        })
+
+    # TEMP LOGIC (no database storage yet)
+    return jsonify({
+        "success": True,
+        "message": "User registered successfully"
+    })
+
+# ==============================
 # ADD COURSEWORK
 # ==============================
 @app.route("/add_coursework", methods=["POST"])
 def add_coursework():
-    data = request.json
+
+    # DEBUG: raw incoming request
+    print("RAW DATA:", request.data)
+
+    # FIX: force JSON parsing (important for your issue)
+    data = request.get_json(force=True)
+
+    print("DATA RECEIVED:", data)  # ✅ DEBUG CHECKPOINT
 
     if not data or "title" not in data or "due_date" not in data:
         return jsonify({"error": "Invalid input"}), 400
 
-    # FIX: convert string → date object
+    # Convert string → date object
     due_date_obj = datetime.strptime(data["due_date"], "%Y-%m-%d").date()
 
     task = Coursework(
@@ -135,6 +180,21 @@ def add_coursework():
     db.session.commit()
 
     return jsonify({"message": "Coursework added successfully"})
+
+# ==============================
+# DELETE COURSEWORK
+# ==============================
+@app.route("/delete_coursework/<int:id>", methods=["DELETE"])
+def delete_coursework(id):
+    task = Coursework.query.get(id)
+
+    if not task:
+        return jsonify({"error": "Not found"}), 404
+
+    db.session.delete(task)
+    db.session.commit()
+
+    return jsonify({"message": "Deleted successfully"})
 
 # ==============================
 # GET ALL COURSEWORK (WITH DAYS LEFT)
@@ -162,6 +222,7 @@ def upcoming():
     result.sort(key=lambda x: x["days_left"])
     return jsonify(result)
 
+
 # ==============================
 # URGENT ALERTS (0–3 DAYS)
 # ==============================
@@ -184,6 +245,7 @@ def alerts():
             })
 
     return jsonify(result)
+
 
 # ==============================
 # OVERDUE TASKS
@@ -208,6 +270,59 @@ def overdue():
 
     return jsonify(result)
 
+# ==============================
+# LOGIN (ADDED ONLY)
+# ==============================
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+
+    email = data.get("email")
+    password = data.get("password")
+
+    # TEMP LOGIC (no database auth yet)
+    if email and password:
+        return jsonify({
+            "success": True,
+            "message": "Login successful"
+        })
+
+    return jsonify({
+        "success": False,
+        "message": "Invalid email or password"
+    })
+
+# ==============================
+# FORGOT PASSWORD (ADDED ONLY)
+# ==============================
+@app.route("/forgot_password", methods=["POST"])
+def forgot_password():
+    data = request.get_json()
+
+    email = data.get("email")
+
+    # TEMP LOGIC (upgrade later with real DB check)
+    if email:
+        return jsonify({
+            "success": True,
+            "message": "Reset link sent"
+        })
+
+    return jsonify({
+        "success": False,
+        "message": "Invalid email"
+    })
+
+
+
+
+@app.route("/debug_db", methods=["GET"])
+def debug_db():
+    tasks = Coursework.query.all()
+    return jsonify([
+        {"id": t.id, "title": t.title}
+        for t in tasks
+    ])
 # ==============================
 # RUN SERVER
 # ==============================
