@@ -99,3 +99,30 @@ function updateProgress() {
 }
 
 updateProgress();
+function toggleMenu() {
+  let menu = document.getElementById("menu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+function goHome() {
+  window.location.href = "dashboard.html";
+}
+
+function goWork() {
+  window.location.href = "work.html";
+}
+
+function goGenerateQuiz() {
+  window.location.href = "generatequiz.html";
+}
+
+function goProfile() {
+  window.location.href = "profile.html";
+}
+
+function goSettings() {
+  window.location.href = "settings.html";
+}
+
+function logout() {
+  window.location.href = "login1.html";
