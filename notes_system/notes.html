@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Notes</title>
+
+    <link rel="stylesheet" href="notes.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <div class="navbar">
+
+        <div class="nav-left">
+            <div class="nav-item" onclick="goHome()">Home</div>
+
+            <div class="nav-item" onclick="goWork()">Work</div>
+
+            <div class="nav-item" onclick="goGenerateQuiz()">Quiz</div>
+
+            <div class="nav-item active" onclick="goGenerateNotes()">
+                Notes
+            </div>
+        </div>
+
+        <div class="profile" onclick="toggleMenu()">
+
+            👤
+
+            <div class="profile-menu" id="menu">
+
+                <div onclick="goProfile()">Profile</div>
+
+                <div onclick="goSettings()">Settings</div>
+
+                <div onclick="logout()">Logout</div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <main class="page-container">
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <h1>AI Study Notes</h1>
+
+            <p>
+                Upload study material, generate editable notes,
+                and track revision progress.
+            </p>
+
+        </section>
+
+
+        <section class="workspace">
+
+            <!-- SIDEBAR -->
+
+            <aside class="sidebar">
+
+                <h2>Subjects</h2>
+
+                <!-- SOFTWARE -->
+
+                <div class="subject-card active-subject"
+                     data-subject="software">
+
+                    <div class="subject-top">
+
+                        <h3>Software Security</h3>
+
+                        <span id="software-percent">0%</span>
+
+                    </div>
+
+                    <div class="mini-progress">
+                        <div class="mini-bar"
+                             id="software-bar"></div>
+                    </div>
+
+                    <p>Secure Coding Notes</p>
+
+                </div>
+
+
+                <!-- ETHICAL -->
+
+                <div class="subject-card"
+                     data-subject="ethical">
+
+                    <div class="subject-top">
+
+                        <h3>Ethical Hacking</h3>
+
+                        <span id="ethical-percent">0%</span>
+
+                    </div>
+
+                    <div class="mini-progress">
+                        <div class="mini-bar"
+                             id="ethical-bar"></div>
+                    </div>
+
+                    <p>Reconnaissance Notes</p>
+
+                </div>
+
+
+                <!-- SYSTEM -->
+
+                <div class="subject-card"
+                     data-subject="system">
+
+                    <div class="subject-top">
+
+                        <h3>System Security</h3>
+
+                        <span id="system-percent">0%</span>
+
+                    </div>
+
+                    <div class="mini-progress">
+                        <div class="mini-bar"
+                             id="system-bar"></div>
+                    </div>
+
+                    <p>Access Control Notes</p>
+
+                </div>
+
+            </aside>
+
+
+            <!-- MAIN PANEL -->
+
+            <section class="main-panel">
+
+                <!-- GENERATE NOTES -->
+
+                <div class="upload-card">
+
+                    <h2>Generate Notes</h2>
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label>Subject</label>
+
+                            <select>
+
+                                <option>Software Security</option>
+
+                                <option>Ethical Hacking</option>
+
+                                <option>System Security</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Chapter / Topic</label>
+
+                            <input type="text"
+                                   placeholder="Example: Secure Coding">
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- UPLOAD BOX -->
+
+                    <div class="upload-box">
+
+                        <div class="upload-icon">📄</div>
+
+                        <h3>Upload Study Material</h3>
+
+                        <p>
+                            Drag & drop your files here or click below
+                        </p>
+
+                        <input type="file" id="fileUpload">
+
+                        <button class="upload-btn"
+                                onclick="document.getElementById('fileUpload').click()">
+
+                            Choose File
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- GENERATE BUTTON -->
+
+                    <button class="generate-btn"
+                            onclick="generateDummyNotes()">
+
+                        Generate Notes
+
+                    </button>
+
+                </div>
+
+
+                <!-- REVISION CHECKLIST -->
+
+                <div class="progress-card">
+
+                    <div class="notes-header">
+
+                        <div>
+
+                            <h2>Revision Checklist</h2>
+
+                            <p>
+                                Tick the topics you have revised.
+                                Progress updates automatically.
+                            </p>
+
+                        </div>
+
+                        <span class="status-badge"
+                              id="currentProgress">
+
+                            0%
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- SOFTWARE TOPICS -->
+
+                    <div class="topic-list"
+                         id="softwareTopics">
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="software">
+
+                            Secure Coding
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="software">
+
+                            Input Validation
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="software">
+
+                            Authentication
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="software">
+
+                            SQL Injection
+                        </label>
+
+                    </div>
+
+
+                    <!-- ETHICAL TOPICS -->
+
+                    <div class="topic-list hidden"
+                         id="ethicalTopics">
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="ethical">
+
+                            Reconnaissance
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="ethical">
+
+                            Nmap Scanning
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="ethical">
+
+                            DNS Enumeration
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="ethical">
+
+                            Vulnerability Scanning
+                        </label>
+
+                    </div>
+
+
+                    <!-- SYSTEM TOPICS -->
+
+                    <div class="topic-list hidden"
+                         id="systemTopics">
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="system">
+
+                            Access Control
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="system">
+
+                            User Permissions
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="system">
+
+                            System Hardening
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                                   class="topic-check"
+                                   data-subject="system">
+
+                            Backup and Recovery
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <!-- NOTES AREA -->
+
+                <div class="notes-card">
+
+                    <div class="notes-header">
+
+                        <div>
+
+                            <h2>Generated Notes</h2>
+
+                            <p>
+                                You can edit the notes before saving.
+                            </p>
+
+                        </div>
+
+                        <span class="status-badge">
+                            Editable
+                        </span>
+
+                    </div>
+
+                    <textarea id="notesArea"
+                              placeholder="AI-generated notes will appear here..."></textarea>
+
+                    <div class="button-row">
+
+                        <button onclick="saveNotes()">
+                            Save Notes
+                        </button>
+
+                        <button onclick="copyNotes()">
+                            Copy
+                        </button>
+
+                        <button class="clear-btn"
+                                onclick="clearNotes()">
+
+                            Clear
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+
+    <!-- JS -->
+
+    <script src="notes.js"></script>
+
+</body>
+</html>
