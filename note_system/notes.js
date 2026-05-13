@@ -80,21 +80,102 @@ function clearNotes() {
 
 // ===== PROGRESS TRACKING =====
 
-const checkboxes = document.querySelectorAll(".topic-check");
+const subjectCards =
+document.querySelectorAll(".subject-card");
+
+const topicLists = {
+    software:
+    document.getElementById("softwareTopics"),
+
+    ethical:
+    document.getElementById("ethicalTopics"),
+
+    system:
+    document.getElementById("systemTopics")
+};
+
+
+// SUBJECT SWITCHING
+
+subjectCards.forEach(card => {
+
+    card.addEventListener("click", () => {
+
+        // remove active highlight
+        subjectCards.forEach(c => {
+            c.classList.remove("active-subject");
+        });
+
+        // add active highlight
+        card.classList.add("active-subject");
+
+        // hide all topic lists
+        Object.values(topicLists)
+        .forEach(list => {
+            list.classList.add("hidden");
+        });
+
+        // show selected topic list
+        const selectedSubject =
+        card.dataset.subject;
+
+        topicLists[selectedSubject]
+        .classList.remove("hidden");
+
+        // update percentage
+        updateProgress();
+
+    });
+
+});
+
+
+// UPDATE PROGRESS
 
 function updateProgress() {
+
+    const activeSubject =
+    document.querySelector(".active-subject")
+    .dataset.subject;
+
+    const checkboxes =
+    document.querySelectorAll(
+        `.topic-check[data-subject="${activeSubject}"]`
+    );
+
+    const checked =
+    document.querySelectorAll(
+        `.topic-check[data-subject="${activeSubject}"]:checked`
+    );
+
     const total = checkboxes.length;
-    const checked = document.querySelectorAll(".topic-check:checked").length;
 
-    const percentage = total === 0 ? 0 : Math.round((checked / total) * 100);
+    const percentage =
+    total === 0
+    ? 0
+    : Math.round((checked.length / total) * 100);
 
-    document.getElementById("currentProgress").textContent = percentage + "%";
-    document.getElementById("software-percent").textContent = percentage + "%";
-    document.getElementById("software-bar").style.width = percentage + "%";
+    document.getElementById("currentProgress")
+    .textContent = percentage + "%";
+
+    document.getElementById(`${activeSubject}-percent`)
+    .textContent = percentage + "%";
+
+    document.getElementById(`${activeSubject}-bar`)
+    .style.width = percentage + "%";
 }
 
-checkboxes.forEach(box => {
+
+// CHECKBOX LISTENERS
+
+document.querySelectorAll(".topic-check")
+.forEach(box => {
+
     box.addEventListener("change", updateProgress);
+
 });
+
+
+// INITIALIZE
 
 updateProgress();
