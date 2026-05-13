@@ -12,40 +12,139 @@ body {
 }
 
 .navbar {
-    height: 60px;
-    background-color: #72bfd7;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 40px;
-    border-bottom: 1px solid #4ba7bf;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 16px 30px;
+  margin: 20px;
+
+  background: rgba(255, 255, 255, 0.75);
+
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255, 255, 255, 0.4);
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.08);
+
+  transition: all 0.3s ease;
 }
 
-.logo {
-    font-size: 22px;
-    font-weight: bold;
+/* LEFT NAV */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
-.nav-links {
-    display: flex;
-    gap: 45px;
+/* NAV ITEMS */
+.nav-item {
+  position: relative;
+
+  padding: 10px 18px;
+
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  font-weight: 500;
+  color: #334155;
+
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.2s ease;
 }
 
-.nav-links a {
-    text-decoration: none;
-    color: #111827;
-    font-weight: 500;
+/* HOVER EFFECT */
+.nav-item:hover {
+  background: #dbeafe;
+
+  color: #2563eb;
+
+  transform: translateY(-2px);
 }
 
-.nav-links .active {
-    font-weight: bold;
-    border-bottom: 2px solid #111827;
-    padding-bottom: 4px;
+/* ACTIVE PAGE */
+.nav-item.active {
+  background: linear-gradient(
+    135deg,
+    #3b82f6,
+    #2563eb
+  );
+
+  color: white;
+
+  font-weight: 600;
+
+  box-shadow:
+    0 4px 12px rgba(37, 99, 235, 0.35);
 }
 
+/* PROFILE */
 .profile {
-    font-size: 20px;
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #eff6ff;
+
+  font-size: 20px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.25s ease,
+    transform 0.2s ease;
 }
+
+.profile:hover {
+  background: #dbeafe;
+
+  transform: scale(1.08);
+}
+
+  /* PROFILE */
+  .profile {
+    position: relative;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .profile-menu {
+    font: arial;
+    border: 2px solid black;
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 35px;
+    background: rgb(255, 255, 255);
+    border-radius: 19px;
+    width: 180px;
+    box-shadow: 7px 13px 15px -1px rgba(0, 0, 0, 0.15);
+    
+  }
+
+  .profile-menu div {
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 19px;
+  }
+
+  .profile-menu div:hover {
+    background: #6fa0d0;
+    color: white;
+    border-radius: 19px;
+    border: 2px solid black;
+  }
 
 .page-container {
     width: 86%;
