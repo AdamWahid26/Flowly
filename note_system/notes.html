@@ -8,17 +8,22 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="logo">StudyMate</div>
+    <div class="navbar">
+  <div class="nav-left">
+    <div class="nav-item active" onclick="goHome()">Home</div>
+    <div class="nav-item" onclick="goWork()">Work</div>
+    <div class="nav-item" onclick="goGenerateQuiz()"> Quiz</div>
+  </div>
 
-        <div class="nav-links">
-            <a href="#">Home</a>
-            <a href="#" class="active">Notes</a>
-            <a href="#">Progress</a>
-        </div>
-
-        <div class="profile">👤</div>
-    </nav>
+  <div class="profile" onclick="toggleMenu()">
+    👤
+    <div class="profile-menu" id="menu">
+      <div onclick="goProfile()">Profile</div>
+      <div onclick="goSettings()">Settings</div>
+      <div onclick="logout()">Logout</div>
+    </div>
+  </div>
+</div>
 
     <main class="page-container">
 
