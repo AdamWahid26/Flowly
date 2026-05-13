@@ -115,9 +115,37 @@
 }
 
     .profile {
-      font-size: 22px;
-      cursor: pointer;
-    }
+    position: relative;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .profile-menu {
+    font: arial;
+    border: 2px solid black;
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 35px;
+    background: rgb(255, 255, 255);
+    border-radius: 19px;
+    width: 180px;
+    box-shadow: 7px 13px 15px -1px rgba(0, 0, 0, 0.15);
+    
+  }
+
+  .profile-menu div {
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 19px;
+  }
+
+  .profile-menu div:hover {
+    background: #6fa0d0;
+    color: white;
+    border-radius: 19px;
+    border: 2px solid black;
+  }
 
     /* MAIN */
     .container {
@@ -274,7 +302,14 @@
     <div class="nav-item active">Quiz Generator</div>
   </div>
 
-  <div class="profile">👤</div>
+  <div class="profile" onclick="toggleMenu()">
+    👤
+    <div class="profile-menu" id="menu">
+      <div onclick="goProfile()">Profile</div>
+      <div onclick="goSettings()">Settings</div>
+      <div onclick="logout()">Logout</div>
+    </div>
+  </div>
 
 </div>
 
@@ -337,6 +372,24 @@
 </div>
 
 <script>
+
+
+function toggleMenu() {
+  let menu = document.getElementById("menu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+function goProfile() {
+  window.location.href = "profile.html";
+}
+
+function goSettings() {
+  window.location.href = "settings.html";
+}
+
+function logout() {
+  window.location.href = "login1.html";
+}
 
 function goHome() {
   window.location.href = "dashboard.html";
