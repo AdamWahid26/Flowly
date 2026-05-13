@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Progress Tracker</title>
+    <link rel="stylesheet" href="progress.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="#">Home</a>
+        <a href="#">Work</a>
+        <a href="#" class="active">Study Progress</a>
+        <span class="profile">👤</span>
+    </nav>
+
+    <section class="hero">
+        <h1>Study Progress Tracker</h1>
+        <p>Organize your subjects, chapters, and subtopics clearly.</p>
+    </section>
+
+    <main class="container">
+
+        <div class="subject-card">
+            <div class="subject-header">
+                <h2>Software Security</h2>
+                <span>75%</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress" style="width: 75%;"></div>
+            </div>
+
+            <div class="chapter">
+                <h3>Chapter 1: Secure Coding</h3>
+                <label><input type="checkbox" checked> Input Validation</label>
+                <label><input type="checkbox" checked> Error Handling</label>
+                <label><input type="checkbox"> Authentication</label>
+            </div>
+
+            <div class="chapter">
+                <h3>Chapter 2: Web Security</h3>
+                <label><input type="checkbox" checked> SQL Injection</label>
+                <label><input type="checkbox"> XSS Attack</label>
+                <label><input type="checkbox"> CSRF</label>
+            </div>
+        </div>
+
+        <div class="subject-card">
+            <div class="subject-header">
+                <h2>Ethical Hacking</h2>
+                <span>50%</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress" style="width: 50%;"></div>
+            </div>
+
+            <div class="chapter">
+                <h3>Chapter 1: Reconnaissance</h3>
+                <label><input type="checkbox" checked> Nmap</label>
+                <label><input type="checkbox" checked> Whois Lookup</label>
+                <label><input type="checkbox"> DNS Enumeration</label>
+            </div>
+
+            <div class="chapter">
+                <h3>Chapter 2: Exploitation</h3>
+                <label><input type="checkbox"> Vulnerability Scanning</label>
+                <label><input type="checkbox"> Exploit Testing</label>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>
