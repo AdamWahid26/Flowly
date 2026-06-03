@@ -61,20 +61,22 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Chapter / Topic</label>
-                            <input type="text" placeholder="Example: Secure Coding">
-                        </div>
-                    </div>
+    <label>Chapter / Topic</label>
+    <input type="text" id="topicInput" placeholder="Example: Secure Coding">
+</div>
 
                     <div class="upload-box">
     <div class="upload-icon">📄</div>
     <h3>Upload Study Material</h3>
     <p>Drag & drop your files here or click below</p>
 
-    <input type="file" id="fileUpload">
-    <button class="upload-btn" onclick="document.getElementById('fileUpload').click()">
+    <input type="file" id="fileUpload" onchange="showSelectedFile()">
+
+    <button type="button" class="upload-btn" onclick="document.getElementById('fileUpload').click()">
         Choose File
     </button>
+
+    <p id="fileNameDisplay" class="file-name-display">No file selected</p>
 </div>
 
                    <button class="generate-btn" onclick="generateDummyNotes()">
