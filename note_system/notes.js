@@ -333,7 +333,16 @@ After reading the notes, tick the related checklist items to update progress.
 4. Summary
 This page allows students to upload material, generate notes, edit them, and track revision progress.`;
 }
+function showSelectedFile() {
+    const fileInput = document.getElementById("fileUpload");
+    const fileNameDisplay = document.getElementById("fileNameDisplay");
 
+    if (fileInput.files.length > 0) {
+        fileNameDisplay.textContent = "Selected file: " + fileInput.files[0].name;
+    } else {
+        fileNameDisplay.textContent = "No file selected";
+    }
+}
 
 // ===== SAVE / COPY / CLEAR =====
 
