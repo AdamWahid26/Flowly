@@ -305,11 +305,57 @@ function updateProgress() {
 
 // ===== GENERATE NOTES =====
 
-function generateDummyNotes() {
+async function generateDummyNotes() {
     const notesArea = document.getElementById("notesArea");
+    const topicInput = document.getElementById("topicInput");
 
-    notesArea.value = "";
-    alert("AI generation is not connected yet.");
+    if (selectedSubjectIndex === null || !subjects[selectedSubjectIndex]) {
+        alert("Please add or select a subject first.");
+        return;
+    }
+
+    const subjectName = subjects[selectedSubjectIndex].name;
+    const topic = topicInput.value.trim();
+
+    const promptText = `
+Subject: ${subjectName}
+Topic: ${topic}
+
+Please generate clear, structured study notes for this subject and topic.
+
+Format:
+1. Overview
+2. Key Concepts
+3. Important Details
+4. Revision Checklist
+5. Summary
+`;
+
+    notesArea.value = "Generating notes with AI...";
+
+    try {
+        const response = await fetch("http://127.0.0.1:5000/summarize_notes", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                notes: promptText
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.summary) {
+            notesArea.value = data.summary;
+        } else {
+            notesArea.value = data.message || "AI generation failed.";
+        }
+
+    } catch (error) {
+        console.error(error);
+        notesArea.value = "Error connecting to backend. Make sure Flask backend is running.";
+    }
 }
 function showSelectedFile() {
     const fileInput = document.getElementById("fileUpload");
@@ -321,7 +367,6 @@ function showSelectedFile() {
         fileNameDisplay.textContent = "No file selected";
     }
 }
-
 // ===== SAVE / COPY / CLEAR =====
 
 function saveNotes() {
