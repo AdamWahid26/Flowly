@@ -13,7 +13,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import os  # FIX: added for absolute database path
 
-print("GROQ KEY:", os.getenv("T4J984v3W1jl5XLWSr8qWGdyb3FYWNV1kvRgd601dqDnicEJzVuS"))
+load_dotenv()
+
+print("GROQ KEY LOADED:", os.getenv("GROQ_API_KEY") is not None)
 # ==============================
 # CREATE FLASK APP
 # ==============================
@@ -39,7 +41,6 @@ db = SQLAlchemy(app)
 # ==============================
 # GROQ CONFIG
 # ==============================
-load_dotenv()
 
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
