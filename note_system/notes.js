@@ -324,62 +324,31 @@ async function generateDummyNotes() {
     const topic = topicInput.value.trim();
     const file = fileInput.files[0];
 
-    notesArea.value = "Reading uploaded file...";
+    const formData = new FormData();
+    formData.append("subject", subjectName);
+    formData.append("topic", topic);
+    formData.append("file", file);
 
-    const reader = new FileReader();
+    notesArea.value = "Uploading and reading PDF...";
 
-    reader.onload = async function (event) {
-        const fileContent = event.target.result;
+    try {
+        const response = await fetch("http://127.0.0.1:5000/generate_notes_from_file", {
+            method: "POST",
+            body: formData
+        });
 
-        const promptText = `
-Subject: ${subjectName}
-Topic: ${topic}
+        const data = await response.json();
 
-Study Material:
-${fileContent}
-
-Please generate clear, structured study notes based ONLY on the uploaded study material.
-
-Format:
-1. Overview
-2. Key Concepts
-3. Important Details
-4. Revision Checklist
-5. Summary
-`;
-
-        notesArea.value = "Generating notes with AI...";
-
-        try {
-            const response = await fetch("http://127.0.0.1:5000/summarize_notes", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    notes: promptText
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success && data.summary) {
-                notesArea.value = data.summary;
-            } else {
-                notesArea.value = data.message || "AI generation failed.";
-            }
-
-        } catch (error) {
-            console.error(error);
-            notesArea.value = "Error connecting to backend. Make sure Flask backend is running.";
+        if (data.success && data.notes) {
+            notesArea.value = data.notes;
+        } else {
+            notesArea.value = data.message || "AI generation failed.";
         }
-    };
 
-    reader.onerror = function () {
-        notesArea.value = "Failed to read uploaded file.";
-    };
-
-    reader.readAsText(file);
+    } catch (error) {
+        console.error(error);
+        notesArea.value = "Error connecting to backend. Make sure Flask backend is running.";
+    }
 }
 function showSelectedFile() {
     const fileInput = document.getElementById("fileUpload");
@@ -391,8 +360,6 @@ function showSelectedFile() {
         fileNameDisplay.textContent = "No file selected";
     }
 }
-
-
 // ===== SAVE / COPY / CLEAR =====
 
 function saveNotes() {

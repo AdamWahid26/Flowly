@@ -12,6 +12,7 @@ from groq import Groq
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import os  # FIX: added for absolute database path
+from pypdf import PdfReader
 
 load_dotenv()
 
@@ -45,7 +46,16 @@ db = SQLAlchemy(app)
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
+def extract_pdf_text(file):
+    reader = PdfReader(file)
+    text = ""
 
+    for page in reader.pages:
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text + "\n"
+
+    return text
 # ==============================
 # AI NOTE SUMMARIZER
 # ==============================
@@ -675,6 +685,85 @@ please ignore this email.
             "success": False,
             "message": "Failed to send email"
         }) 
+    
+# ==============================
+# AI NOTES FROM UPLOADED PDF
+# ==============================
+
+@app.route("/generate_notes_from_file", methods=["POST"])
+def generate_notes_from_file():
+    subject = request.form.get("subject", "")
+    topic = request.form.get("topic", "")
+    uploaded_file = request.files.get("file")
+
+    if not uploaded_file:
+        return jsonify({
+            "success": False,
+            "message": "No file uploaded"
+        }), 400
+
+    try:
+        filename = uploaded_file.filename.lower()
+
+        if filename.endswith(".pdf"):
+            file_text = extract_pdf_text(uploaded_file)
+        else:
+            file_text = uploaded_file.read().decode("utf-8", errors="ignore")
+
+        if not file_text.strip():
+            return jsonify({
+                "success": False,
+                "message": "File content could not be read. If this is a scanned PDF, text extraction may not work."
+            }), 400
+
+        prompt = f"""
+You are an AI study notes assistant.
+
+Generate clear, structured study notes based ONLY on the uploaded study material.
+
+Subject: {subject}
+Topic: {topic}
+
+Uploaded Study Material:
+{file_text}
+
+Format:
+1. Overview
+2. Key Concepts
+3. Important Details
+4. Key Terms
+5. Revision Questions
+6. Summary
+"""
+
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You create structured study notes from uploaded study materials."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        notes = response.choices[0].message.content
+
+        return jsonify({
+            "success": True,
+            "notes": notes
+        })
+
+    except Exception as e:
+        print("AI FILE NOTES ERROR:", e)
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 # ==============================
 # RUN SERVER
 # ==============================
