@@ -296,7 +296,13 @@ select {
     transition: 0.3s ease;
     margin-bottom: 24px;
 }
-
+.upload-reminder {
+    margin-top: 6px;
+    margin-bottom: 18px;
+    color: #2563eb;
+    font-size: 14px;
+    font-weight: 600;
+}
 .upload-box:hover {
     background-color: #eef8ff;
     border-color: #72bfd7;

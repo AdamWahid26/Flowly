@@ -70,8 +70,9 @@
                         <div class="upload-icon">📄</div>
                         <h3>Upload Study Material</h3>
                         <p>Drag & drop your files here or click below</p>
+                        <p class="upload-reminder">Please upload PDF files only.</p>
 
-                        <input type="file" id="fileUpload" onchange="showSelectedFile()">
+                        <input type="file" id="fileUpload" accept=".pdf" onchange="showSelectedFile()">
 
                         <button type="button" class="upload-btn" onclick="document.getElementById('fileUpload').click()">
                             Choose File
