@@ -554,18 +554,23 @@ textarea {
                     <h2>Generate Notes</h2>
 
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label>Subject</label>
-                            <select id="subjectSelect">
-                                <option value="">No subject added yet</option>
-                            </select>
-                        </div>
+    <div class="form-group">
+        <label>Subject</label>
+        <select id="subjectSelect">
+            <option value="">No subject added yet</option>
+        </select>
+    </div>
 
-                        <div class="form-group">
-                            <label>Chapter / Topic</label>
-                            <input type="text" id="topicInput" placeholder="Example: Secure Coding">
-                        </div>
-                    </div>
+    <div class="form-group">
+        <label>Chapter / Topic</label>
+        <input type="text" id="topicInput" placeholder="Example: Secure Coding">
+
+        <label style="margin-top: 12px;">Saved Notes</label>
+        <select id="savedNotesSelect" onchange="loadSelectedSavedNote()">
+            <option value="">No saved notes yet</option>
+        </select>
+    </div>
+</div>
 
                     <div class="upload-box">
                         <div class="upload-icon">📄</div>
@@ -730,12 +735,14 @@ function renderSubjects() {
             </div>
         `;
 
-        card.addEventListener("click", () => {
-            selectedSubjectIndex = index;
-            subjectSelect.value = index;
-            renderSubjects();
-            renderTopics();
-        });
+       card.addEventListener("click", () => {
+    selectedSubjectIndex = index;
+    subjectSelect.value = index;
+    renderSubjects();
+    renderTopics();
+    renderSavedNotesList();
+    loadNotesByTopic();
+});
 
         subjectList.appendChild(card);
 
@@ -773,9 +780,10 @@ function addSubject() {
     selectedSubjectIndex = subjects.length - 1;
     input.value = "";
 
-    saveSubjects();
-    renderSubjects();
-    renderTopics();
+   saveSubjects();
+renderSubjects();
+renderTopics();
+renderSavedNotesList();
 }
 
 function editSubject(event, index) {
@@ -802,9 +810,10 @@ function deleteSubject(event, index) {
             selectedSubjectIndex = 0;
         }
 
-        saveSubjects();
-        renderSubjects();
-        renderTopics();
+       saveSubjects();
+renderSubjects();
+renderTopics();
+renderSavedNotesList();
     }
 }
 
@@ -817,6 +826,8 @@ document.getElementById("subjectSelect").addEventListener("change", function () 
 
     renderSubjects();
     renderTopics();
+    renderSavedNotesList();
+    loadNotesByTopic();
 });
 
 
@@ -995,6 +1006,8 @@ function showSelectedFile() {
 }
 // ===== SAVE / COPY / CLEAR =====
 
+// ===== SAVE / COPY / CLEAR =====
+
 function saveNotes() {
     const notesArea = document.getElementById("notesArea");
     const topicInput = document.getElementById("topicInput");
@@ -1018,10 +1031,23 @@ function saveNotes() {
     subjects[selectedSubjectIndex].notesByTopic[topic] = notesArea.value;
 
     saveSubjects();
+    renderSavedNotesList();
 
     alert("Notes saved successfully for topic: " + topic);
 }
 
+function copyNotes() {
+    const notesArea = document.getElementById("notesArea");
+
+    notesArea.select();
+    document.execCommand("copy");
+
+    alert("Notes copied.");
+}
+
+function clearNotes() {
+    document.getElementById("notesArea").value = "";
+}
 // ===== LOAD NOTES =====
 
 function loadNotesByTopic() {
@@ -1047,13 +1073,65 @@ function loadNotesByTopic() {
         notesArea.value = "";
     }
 }
+function renderSavedNotesList() {
+    const savedNotesSelect = document.getElementById("savedNotesSelect");
 
+    savedNotesSelect.innerHTML = "";
+
+    if (selectedSubjectIndex === null || !subjects[selectedSubjectIndex]) {
+        savedNotesSelect.innerHTML = "<option value=''>No subject selected</option>";
+        return;
+    }
+
+    const selectedSubject = subjects[selectedSubjectIndex];
+
+    if (!selectedSubject.notesByTopic) {
+        selectedSubject.notesByTopic = {};
+    }
+
+    const savedTopics = Object.keys(selectedSubject.notesByTopic);
+
+    if (savedTopics.length === 0) {
+        savedNotesSelect.innerHTML = "<option value=''>No saved notes yet</option>";
+        return;
+    }
+
+    savedNotesSelect.innerHTML = "<option value=''>Select saved notes</option>";
+
+    savedTopics.forEach(topic => {
+        const option = document.createElement("option");
+        option.value = topic;
+        option.textContent = topic;
+        savedNotesSelect.appendChild(option);
+    });
+}
+
+function loadSelectedSavedNote() {
+    const savedNotesSelect = document.getElementById("savedNotesSelect");
+    const topicInput = document.getElementById("topicInput");
+    const notesArea = document.getElementById("notesArea");
+
+    const selectedTopic = savedNotesSelect.value;
+
+    if (selectedTopic === "") {
+        return;
+    }
+
+    topicInput.value = selectedTopic;
+
+    const selectedSubject = subjects[selectedSubjectIndex];
+
+    if (selectedSubject.notesByTopic && selectedSubject.notesByTopic[selectedTopic]) {
+        notesArea.value = selectedSubject.notesByTopic[selectedTopic];
+    }
+}
 // ===== EVENT LISTENERS =====
 document.getElementById("topicInput").addEventListener("change", loadNotesByTopic);
 // ===== INITIAL LOAD =====
 
 renderSubjects();
 renderTopics();
+renderSavedNotesList();
 </script>
 </body>
 </html>
