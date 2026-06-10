@@ -13,171 +13,92 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import fitz
 import traceback
-import os  # FIX: added for absolute database path
-from pypdf import PdfReader
+import os
 
-load_dotenv()
 
-print("GROQ KEY LOADED:", os.getenv("GROQ_API_KEY") is not None)
 # ==============================
 # CREATE FLASK APP
 # ==============================
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+
 # ==============================
 # SQLITE CONFIGURATION
 # ==============================
-
-# FIX: get absolute path of current folder (Harith folder)
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+load_dotenv(dotenv_path=os.path.join(basedir, ".env"))
 
 print("DATABASE PATH:", os.path.join(basedir, "database.db"))
 
-# FIX: ensures database.db is always correctly linked
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "database.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+
 
 # ==============================
 # GROQ CONFIG
 # ==============================
-
-client = Groq(
-    api_key=os.getenv("GROQ_API_KEY")
-)
-def extract_pdf_text(file):
-    reader = PdfReader(file)
-    text = ""
-
-    for page in reader.pages:
-        page_text = page.extract_text()
-        if page_text:
-            text += page_text + "\n"
-
-    return text
-# ==============================
-# AI NOTE SUMMARIZER
-# ==============================
-@app.route("/summarize_notes", methods=["POST"])
-def summarize_notes():
-
-    data = request.get_json()
-
-    notes = data.get("notes")
-
-    if not notes:
-        return jsonify({
-            "success": False,
-            "message": "No notes provided"
-        })
-
-    try:
-
-        response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a study assistant that summarizes notes clearly for students."
-                },
-
-                {
-                    "role": "user",
-                    "content": f"Summarize these notes:\n\n{notes}"
-                }
-            ]
-        )
-
-        summary = response.choices[0].message.content
-
-        return jsonify({
-            "success": True,
-            "summary": summary
-        })
-
-    except Exception as e:
-
-        print(e)
-
-        return jsonify({
-            "success": False,
-            "message": "AI summarization failed"
-        })
-load_dotenv(dotenv_path=os.path.join(basedir, ".env"))
-
 api_key = os.getenv("GROQ_API_KEY", "").strip()
+
+print("GROQ KEY LOADED:", api_key != "")
 
 if not api_key:
     print("WARNING: GROQ_API_KEY not found in .env")
 
 client = Groq(api_key=api_key)
 
-# ------------------------------
-# USER TABLE
-# ------------------------------
+
+# ==============================
+# EMAIL CONFIGURATION
+# ==============================
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+
+if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
+    print("WARNING: Email credentials missing")
+
+
+# ==============================
+# DATABASE MODELS
+# ==============================
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    
-# ------------------------------
-# NOTE TABLE
-# ------------------------------
+    password = db.Column(db.String(200))
+
+
 class Notes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     subject = db.Column(db.String(100))
     topic = db.Column(db.String(200))
-
     content = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow
-    )
 
-# ------------------------------
-# QUIZ TABLE
-# ------------------------------
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     title = db.Column(db.String(200))
-
     content = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow
-    ) 
 
-# ------------------------------
-# COURSEWORK TABLE (PARENT)
-# ------------------------------
 class Coursework(db.Model):
     __tablename__ = "coursework"
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.String(300))
-    
-    # FIX: use proper DATE type instead of string
     due_date = db.Column(db.Date, nullable=False)
-
     status = db.Column(db.String(20), default="In Progress")
 
-    # RELATIONSHIP: one coursework has many members
-    members = db.relationship('Member', backref='coursework', lazy=True)
+    members = db.relationship("Member", backref="coursework", lazy=True)
 
 
-# ------------------------------
-# MEMBER TABLE (CHILD)
-# ------------------------------
 class Member(db.Model):
     __tablename__ = "member"
 
@@ -185,235 +106,15 @@ class Member(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100))
     role = db.Column(db.String(50))
+    coursework_id = db.Column(db.Integer, db.ForeignKey("coursework.id"))
 
-    # FIX: proper foreign key relationship
-    coursework_id = db.Column(db.Integer, db.ForeignKey('coursework.id'))
-
-# ==============================
-# CREATE DATABASE (RUN ONCE ONLY)
-# ==============================
-# IMPORTANT:
-# Run this ONCE manually or via separate init script, then comment it back.
-
-#with app.app_context():
-#    db.create_all()
-# ==============================
-# AI NOTE SUMMARIZER
-# ==============================
-@app.route("/generate_notes_from_file", methods=["POST"])
-def generate_notes_from_file():
-
-    if "file" not in request.files:
-        return jsonify({
-            "success": False,
-            "message": "No PDF uploaded"
-        }), 400
-
-    pdf = request.files["file"]
-
-    text = ""
-
-    try:
-
-        pdf_document = fitz.open(
-            stream=pdf.read(),
-            filetype="pdf"
-        )
-
-        for page in pdf_document:
-            text += page.get_text()
-
-        if not text.strip():
-            return jsonify({
-                "success": False,
-                "message": "No text found in PDF"
-            }), 400
-
-        response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-
-            messages=[
-                {
-                    "role": "system",
-                    "content": """
-You are an expert study assistant.
-
-Create organized study notes with:
-- Headings
-- Bullet points
-- Key concepts
-- Important definitions
-- Simple explanations
-
-Make the notes easy for students to revise.
-"""
-                },
-                {
-                    "role": "user",
-                    "content": f"""
-Generate study notes from this material:
-
-{text[:12000]}
-"""
-                }
-            ]
-        )
-
-        summary = response.choices[0].message.content
-        subject = request.form.get("subject", "")
-        topic = request.form.get("topic", "")
-
-        new_note = Notes(
-        subject=subject,
-        topic=topic,
-        content=summary
-)
-        db.session.add(new_note)
-        db.session.commit()
-
-        return jsonify({
-            "success": True,
-            "notes": summary
-        }), 200
-
-    except Exception as e:
-
-        print("NOTES ERROR:", e)
-
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
-# ==============================
-# API to load notes
-# ==============================
-@app.route("/notes", methods=["GET"])
-def get_notes():
-
-    notes = Notes.query.order_by(
-        Notes.created_at.desc()
-    ).all()
-
-    return jsonify([
-        {
-            "id": n.id,
-            "subject": n.subject,
-            "topic": n.topic,
-            "content": n.content
-        }
-        for n in notes
-    ])
 
 # ==============================
-# AI QUIZ GENERATOR
+# CREATE DATABASE TABLES
 # ==============================
-@app.route("/generate_quiz", methods=["POST"])
-def generate_quiz():
+with app.app_context():
+    db.create_all()
 
-    if "pdf" not in request.files:
-        return jsonify({
-            "success": False,
-            "message": "No PDF uploaded"
-        }), 400
-
-    pdf = request.files["pdf"]
-
-    difficulty = request.form.get("difficulty", "Medium")
-    question_count = request.form.get("questionCount", "10")
-
-    text = ""
-
-    pdf_document = fitz.open(
-        stream=pdf.read(),
-        filetype="pdf"
-    )
-
-    for page in pdf_document:
-        text += page.get_text()
-
-    prompt = f"""
-Generate {question_count} multiple-choice questions.
-
-STRICT FORMAT (VERY IMPORTANT):
-
-Q1. Question text?
-A. option 1
-B. option 2
-C. option 3
-D. option 4
-Answer: B
-
-Q2. Question text?
-A. ...
-B. ...
-C. ...
-D. ...
-Answer: C
-
-Rules:
-- No explanations
-- No markdown
-- No headings
-- Only questions in this format
-- Always include Answer line
-
-Notes:
-{text[:12000]}
-"""
-
-    try:
-
-        response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
-
-        quiz = response.choices[0].message.content
-        new_quiz = Quiz(
-        title=f"{difficulty} Quiz",
-        content=quiz
-)
-
-        db.session.add(new_quiz)
-        db.session.commit()
-
-        return jsonify({
-            "success": True,
-            "quiz": quiz
-        })
-
-    except Exception as e:
-
-        print("QUIZ ERROR:", e)
-        traceback.print_exc()
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
-    
-# ==============================
-# API to load quizzes
-# ==============================
-@app.route("/quizzes", methods=["GET"])
-def get_quizzes():
-
-    quizzes = Quiz.query.order_by(
-        Quiz.created_at.desc()
-    ).all()
-
-    return jsonify([
-        {
-            "id": q.id,
-            "title": q.title,
-            "content": q.content
-        }
-        for q in quizzes
-    ])
 
 # ==============================
 # HOME ROUTE
@@ -424,119 +125,387 @@ def home():
 
 
 # ==============================
-# ADD MEMBER
-# ==============================
-@app.route("/add_member", methods=["POST"])
-def add_member():
-    data = request.get_json()  # FIX: safer than request.json
-
-    if not data or "name" not in data:
-        return jsonify({"error": "Invalid input"}), 400
-
-    member = Member(
-        name=data["name"],
-        email=data.get("email", ""),
-        role=data.get("role", ""),
-        coursework_id=data.get("coursework_id")
-    )
-
-    db.session.add(member)
-    db.session.commit()
-
-    return jsonify({"message": "Member added successfully"}), 200
-
-
-# ==============================
-# GET ALL MEMBERS
-# ==============================
-@app.route("/all_members", methods=["GET"])
-def all_members():
-    members = Member.query.all()
-
-    return jsonify([
-        {
-            "id": m.id,
-            "name": m.name,
-            "email": m.email,
-            "role": m.role,
-            "coursework_id": m.coursework_id
-        }
-        for m in members
-    ]), 200
-
-# ==============================
 # REGISTER ROUTE
 # ==============================
 @app.route("/register", methods=["POST"])
 def register():
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    if not data:
-        return jsonify({"success": False, "message": "No data sent"}), 400
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "No data sent"
+            }), 400
 
-    username = data.get("username")
-    email = data.get("email")
-    password = data.get("password")
+        username = data.get("username")
+        email = data.get("email")
+        password = data.get("password")
 
-    if not username or not email or not password:
+        if not username or not email or not password:
+            return jsonify({
+                "success": False,
+                "message": "Missing fields"
+            }), 400
+
+        existing_user = User.query.filter_by(email=email).first()
+
+        if existing_user:
+            return jsonify({
+                "success": False,
+                "message": "Email already exists"
+            }), 400
+
+        new_user = User(
+            username=username,
+            email=email,
+            password=generate_password_hash(password)
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
         return jsonify({
-    "success": False,
-    "message": "Missing fields"
-}), 400
+            "success": True,
+            "message": "Registration successful"
+        }), 200
 
-    existing_user = User.query.filter_by(email=email).first()
+    except Exception as e:
+        print("REGISTER ERROR:", e)
+        traceback.print_exc()
 
-    if existing_user:
-        return jsonify({"success": False, "message": "Email already exists"}), 400
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
-    new_user = User(
-        username=username,
-        email=email,
-        password=generate_password_hash(password)
-    )
 
-    db.session.add(new_user)
-    db.session.commit()
+# ==============================
+# LOGIN ROUTE
+# ==============================
+@app.route("/login", methods=["POST"])
+def login():
+    try:
+        data = request.get_json()
 
-    return jsonify({"success": True, "message": "Registration successful"}), 200
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "No data sent"
+            }), 400
+
+        email = data.get("email")
+        password = data.get("password")
+
+        if not email or not password:
+            return jsonify({
+                "success": False,
+                "message": "Missing email or password"
+            }), 400
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify({
+                "success": False,
+                "message": "User not found"
+            }), 404
+
+        if check_password_hash(user.password, password):
+            return jsonify({
+                "success": True,
+                "message": "Login successful"
+            }), 200
+
+        return jsonify({
+            "success": False,
+            "message": "Invalid password"
+        }), 401
+
+    except Exception as e:
+        print("LOGIN ERROR:", e)
+        traceback.print_exc()
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
+# ==============================
+# UPDATE PROFILE
+# ==============================
+@app.route("/update_profile", methods=["POST"])
+def update_profile():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "No data sent"
+            }), 400
+
+        email = data.get("email")
+        username = data.get("username")
+
+        if not email or not username:
+            return jsonify({
+                "success": False,
+                "message": "Missing email or username"
+            }), 400
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify({
+                "success": False,
+                "message": "User not found"
+            }), 404
+
+        user.username = username
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Profile updated successfully"
+        }), 200
+
+    except Exception as e:
+        print("UPDATE PROFILE ERROR:", e)
+        traceback.print_exc()
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
+# ==============================
+# CHANGE PASSWORD
+# ==============================
+@app.route("/change_password", methods=["POST"])
+def change_password():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "No data sent"
+            }), 400
+
+        email = data.get("email")
+        current_password = data.get("current_password")
+        new_password = data.get("new_password")
+
+        if not email or not current_password or not new_password:
+            return jsonify({
+                "success": False,
+                "message": "Missing fields"
+            }), 400
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify({
+                "success": False,
+                "message": "User not found"
+            }), 404
+
+        if not check_password_hash(user.password, current_password):
+            return jsonify({
+                "success": False,
+                "message": "Current password incorrect"
+            }), 400
+
+        user.password = generate_password_hash(new_password)
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Password updated successfully"
+        }), 200
+
+    except Exception as e:
+        print("CHANGE PASSWORD ERROR:", e)
+        traceback.print_exc()
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
+# ==============================
+# FORGOT PASSWORD
+# ==============================
+@app.route("/forgot_password", methods=["POST"])
+def forgot_password():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "No data sent"
+            }), 400
+
+        email = data.get("email")
+
+        if not email:
+            return jsonify({
+                "success": False,
+                "message": "Invalid email"
+            }), 400
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify({
+                "success": False,
+                "message": "Email not found"
+            }), 404
+
+        subject = "Flowly Password Reset"
+
+        body = f"""
+Hello,
+
+We received a request to reset your password.
+
+Click the link below to reset it:
+
+http://127.0.0.1:5500/test/resetpassword.html?email={email}
+
+If you did not request this,
+please ignore this email.
+
+- Flowly Team
+"""
+
+        msg = MIMEMultipart()
+        msg["From"] = EMAIL_ADDRESS
+        msg["To"] = email
+        msg["Subject"] = subject
+        msg.attach(MIMEText(body, "plain"))
+
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        server.sendmail(EMAIL_ADDRESS, email, msg.as_string())
+        server.quit()
+
+        return jsonify({
+            "success": True,
+            "message": "Reset email sent successfully"
+        }), 200
+
+    except Exception as e:
+        print("EMAIL ERROR:", e)
+        traceback.print_exc()
+
+        return jsonify({
+            "success": False,
+            "message": "Failed to send email"
+        }), 500
+
+
+# ==============================
+# RESET PASSWORD
+# ==============================
+@app.route("/reset_password", methods=["POST"])
+def reset_password():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "No data sent"
+            }), 400
+
+        email = data.get("email")
+        new_password = data.get("new_password")
+
+        if not email or not new_password:
+            return jsonify({
+                "success": False,
+                "message": "Missing email or new password"
+            }), 400
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify({
+                "success": False,
+                "message": "User not found"
+            }), 404
+
+        user.password = generate_password_hash(new_password)
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Password reset successful"
+        }), 200
+
+    except Exception as e:
+        print("RESET PASSWORD ERROR:", e)
+        traceback.print_exc()
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
 # ==============================
 # ADD COURSEWORK
 # ==============================
 @app.route("/add_coursework", methods=["POST"])
 def add_coursework():
+    try:
+        data = request.get_json(force=True)
 
-    # DEBUG: raw incoming request
-    print("RAW DATA:", request.data)
+        if not data or "title" not in data or "due_date" not in data:
+            return jsonify({
+                "success": False,
+                "message": "Invalid input"
+            }), 400
 
-    # FIX: force JSON parsing (important for your issue)
-    data = request.get_json(force=True)
+        due_date_obj = datetime.strptime(data["due_date"], "%Y-%m-%d").date()
 
-    print("DATA RECEIVED:", data)  # ✅ DEBUG CHECKPOINT
+        task = Coursework(
+            title=data["title"],
+            description=data.get("description", ""),
+            due_date=due_date_obj,
+            status=data.get("status", "In Progress")
+        )
 
-    if not data or "title" not in data or "due_date" not in data:
-        return jsonify({"error": "Invalid input"}), 400
+        db.session.add(task)
+        db.session.commit()
 
-    # Convert string → date object
-    due_date_obj = datetime.strptime(data["due_date"], "%Y-%m-%d").date()
+        return jsonify({
+            "success": True,
+            "message": "Coursework added successfully"
+        }), 200
 
-    task = Coursework(
-        title=data["title"],
-        description=data.get("description", ""),
-        due_date=due_date_obj,
-        status=data.get("status", "In Progress")
-    )
+    except Exception as e:
+        print("ADD COURSEWORK ERROR:", e)
+        traceback.print_exc()
 
-    db.session.add(task)
-    db.session.commit()
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
-    return jsonify({"message": "Coursework added successfully"}), 200
 
 # ==============================
 # LOAD COURSEWORK
 # ==============================
 @app.route("/coursework", methods=["GET"])
 def get_coursework():
-
     tasks = Coursework.query.all()
 
     return jsonify([
@@ -550,6 +519,7 @@ def get_coursework():
         for t in tasks
     ]), 200
 
+
 # ==============================
 # DELETE COURSEWORK
 # ==============================
@@ -558,15 +528,22 @@ def delete_coursework(id):
     task = Coursework.query.get(id)
 
     if not task:
-        return jsonify({"error": "Not found"}), 404
+        return jsonify({
+            "success": False,
+            "message": "Not found"
+        }), 404
 
     db.session.delete(task)
     db.session.commit()
 
-    return jsonify({"message": "Deleted successfully"}), 200
+    return jsonify({
+        "success": True,
+        "message": "Deleted successfully"
+    }), 200
+
 
 # ==============================
-# GET ALL COURSEWORK (WITH DAYS LEFT)
+# GET UPCOMING COURSEWORK
 # ==============================
 @app.route("/upcoming", methods=["GET"])
 def upcoming():
@@ -589,11 +566,12 @@ def upcoming():
             })
 
     result.sort(key=lambda x: x["days_left"])
+
     return jsonify(result), 200
 
 
 # ==============================
-# URGENT ALERTS (0–3 DAYS)
+# URGENT ALERTS
 # ==============================
 @app.route("/alerts", methods=["GET"])
 def alerts():
@@ -639,286 +617,294 @@ def overdue():
 
     return jsonify(result), 200
 
-# ==============================
-# LOGIN
-# ==============================
-@app.route("/login", methods=["POST"])
-def login():
-    data = request.get_json()
-
-    if not data:
-        return jsonify({
-            "success": False,
-            "message": "No data sent"
-        }), 400
-
-    email = data.get("email")
-    password = data.get("password")
-
-    if not email or not password:
-        return jsonify({
-            "success": False,
-            "message": "Missing email or password"
-        }), 400
-
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        return jsonify({
-            "success": False,
-            "message": "User not found"
-        }), 404
-
-    if check_password_hash(user.password, password):
-        return jsonify({
-            "success": True,
-            "message": "Login successful"
-        }), 200
-
-    return jsonify({
-        "success": False,
-        "message": "Invalid password"
-    }), 401
-# ==============================
-# EMAIL CONFIGURATION
-# ==============================
-
-EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-
-if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
-    print("WARNING: Email credentials missing")
 
 # ==============================
-# UPDATE PROFILE
+# ADD MEMBER
 # ==============================
-@app.route("/update_profile", methods=["POST"])
-def update_profile():
-    data = request.get_json()
-
-    # ✅ ADD HERE
-    if not data:
-        return jsonify({
-            "success": False,
-            "message": "No data sent"
-        }), 400
-
-    email = data.get("email")
-    username = data.get("username")
-
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-
-        return jsonify({
-            "success": False,
-            "message": "User not found"
-        }), 400
-
-    user.username = username
-
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "message": "Profile updated successfully"
-    }), 200
-
-
-# ==============================
-# CHANGE PASSWORD
-# ==============================
-@app.route("/change_password", methods=["POST"])
-def change_password():
-
-    data = request.get_json()
-
-    if not data:
-        return jsonify({
-            "success": False,
-            "message": "No data sent"
-        }), 400
-
-    email = data.get("email")
-    current_password = data.get("current_password")
-    new_password = data.get("new_password")
-
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        return jsonify({
-            "success": False,
-            "message": "User not found"
-        }), 404
-
-    if not check_password_hash(user.password, current_password):
-        return jsonify({
-            "success": False,
-            "message": "Current password incorrect"
-        }), 400
-
-    user.password = generate_password_hash(new_password)
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "message": "Password updated successfully"
-    }), 200
-# ==============================
-# FORGOT PASSWORD
-# ==============================
-@app.route("/forgot_password", methods=["POST"])
-def forgot_password():
-
-    data = request.get_json()
-
-    email = data.get("email")
-
-    if not email:
-        return jsonify({
-            "success": False,
-            "message": "Invalid email"
-        }), 400
-
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        return jsonify({
-            "success": False,
-            "message": "Email not found"
-        }), 404
-
+@app.route("/add_member", methods=["POST"])
+def add_member():
     try:
+        data = request.get_json()
 
-        # ==============================
-        # EMAIL CONTENT
-        # ==============================
+        if not data or "name" not in data:
+            return jsonify({
+                "success": False,
+                "message": "Invalid input"
+            }), 400
 
-        subject = "Flowly Password Reset"
-
-        body = f"""
-Hello,
-
-We received a request to reset your password.
-
-Click the link below to reset it:
-
-http://127.0.0.1:5500/test/resetpassword.html?email={email}
-
-If you did not request this,
-please ignore this email.
-
-- Flowly Team
-"""
-
-        # ==============================
-        # CREATE EMAIL
-        # ==============================
-
-        msg = MIMEMultipart()
-
-        msg["From"] = EMAIL_ADDRESS
-        msg["To"] = email
-        msg["Subject"] = subject
-
-        msg.attach(MIMEText(body, "plain"))
-
-        # ==============================
-        # CONNECT TO GMAIL SMTP
-        # ==============================
-
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-
-        server.starttls()
-
-        server.login(
-            EMAIL_ADDRESS,
-            EMAIL_PASSWORD
+        member = Member(
+            name=data["name"],
+            email=data.get("email", ""),
+            role=data.get("role", ""),
+            coursework_id=data.get("coursework_id")
         )
 
-        # ==============================
-        # SEND EMAIL
-        # ==============================
-
-        server.sendmail(
-            EMAIL_ADDRESS,
-            email,
-            msg.as_string()
-        )
-
-        server.quit()
+        db.session.add(member)
+        db.session.commit()
 
         return jsonify({
             "success": True,
-            "message": "Reset email sent successfully"
+            "message": "Member added successfully"
         }), 200
 
     except Exception as e:
-
-        print("EMAIL ERROR:", e)
+        print("ADD MEMBER ERROR:", e)
+        traceback.print_exc()
 
         return jsonify({
             "success": False,
-            "message": "Failed to send email"
-        }) 
-    
+            "message": str(e)
+        }), 500
+
+
 # ==============================
-# AI NOTES FROM UPLOADED PDF
+# GET ALL MEMBERS
 # ==============================
+@app.route("/all_members", methods=["GET"])
+def all_members():
+    members = Member.query.all()
 
-@app.route("/generate_notes_from_file", methods=["POST"])
-def generate_notes_from_file():
-    subject = request.form.get("subject", "")
-    topic = request.form.get("topic", "")
-    uploaded_file = request.files.get("file")
+    return jsonify([
+        {
+            "id": m.id,
+            "name": m.name,
+            "email": m.email,
+            "role": m.role,
+            "coursework_id": m.coursework_id
+        }
+        for m in members
+    ]), 200
 
-    if not uploaded_file:
-        return jsonify({
-            "success": False,
-            "message": "No file uploaded"
-        }), 400
 
+# ==============================
+# AI NOTE SUMMARIZER
+# ==============================
+@app.route("/summarize_notes", methods=["POST"])
+def summarize_notes():
     try:
-        filename = uploaded_file.filename.lower()
+        data = request.get_json()
 
-        if filename.endswith(".pdf"):
-            file_text = extract_pdf_text(uploaded_file)
-        else:
-            file_text = uploaded_file.read().decode("utf-8", errors="ignore")
-
-        if not file_text.strip():
+        if not data:
             return jsonify({
                 "success": False,
-                "message": "File content could not be read. If this is a scanned PDF, text extraction may not work."
+                "message": "No data sent"
             }), 400
 
-        prompt = f"""
-You are an AI study notes assistant.
+        notes = data.get("notes")
 
-Generate clear, structured study notes based ONLY on the uploaded study material.
-
-Subject: {subject}
-Topic: {topic}
-
-Uploaded Study Material:
-{file_text}
-
-Format:
-1. Overview
-2. Key Concepts
-3. Important Details
-4. Key Terms
-5. Revision Questions
-6. Summary
-"""
+        if not notes:
+            return jsonify({
+                "success": False,
+                "message": "No notes provided"
+            }), 400
 
         response = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
                 {
                     "role": "system",
-                    "content": "You create structured study notes from uploaded study materials."
+                    "content": "You are a study assistant that summarizes notes clearly for students."
                 },
+                {
+                    "role": "user",
+                    "content": f"Summarize these notes:\n\n{notes}"
+                }
+            ]
+        )
+
+        summary = response.choices[0].message.content
+
+        return jsonify({
+            "success": True,
+            "summary": summary
+        }), 200
+
+    except Exception as e:
+        print("SUMMARIZE NOTES ERROR:", e)
+        traceback.print_exc()
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
+# ==============================
+# GENERATE NOTES FROM PDF
+# ==============================
+@app.route("/generate_notes_from_file", methods=["POST"])
+def generate_notes_from_file():
+    try:
+        if "file" not in request.files:
+            return jsonify({
+                "success": False,
+                "message": "No PDF uploaded"
+            }), 400
+
+        pdf = request.files["file"]
+        subject = request.form.get("subject", "")
+        topic = request.form.get("topic", "")
+
+        text = ""
+
+        pdf_document = fitz.open(
+            stream=pdf.read(),
+            filetype="pdf"
+        )
+
+        for page in pdf_document:
+            text += page.get_text()
+
+        if not text.strip():
+            return jsonify({
+                "success": False,
+                "message": "No text found in PDF"
+            }), 400
+
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+You are an expert study assistant.
+
+Create organized study notes with:
+- Headings
+- Bullet points
+- Key concepts
+- Important definitions
+- Simple explanations
+
+Make the notes easy for students to revise.
+"""
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+Generate study notes from this material.
+
+Subject: {subject}
+Topic: {topic}
+
+Material:
+{text[:12000]}
+"""
+                }
+            ]
+        )
+
+        notes = response.choices[0].message.content
+
+        new_note = Notes(
+            subject=subject,
+            topic=topic,
+            content=notes
+        )
+
+        db.session.add(new_note)
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "notes": notes
+        }), 200
+
+    except Exception as e:
+        print("GENERATE NOTES ERROR:", e)
+        traceback.print_exc()
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
+# ==============================
+# LOAD SAVED NOTES
+# ==============================
+@app.route("/notes", methods=["GET"])
+def get_notes():
+    notes = Notes.query.order_by(Notes.created_at.desc()).all()
+
+    return jsonify([
+        {
+            "id": n.id,
+            "subject": n.subject,
+            "topic": n.topic,
+            "content": n.content
+        }
+        for n in notes
+    ]), 200
+
+
+# ==============================
+# GENERATE QUIZ FROM PDF
+# ==============================
+@app.route("/generate_quiz", methods=["POST"])
+def generate_quiz():
+    try:
+        if "pdf" not in request.files:
+            return jsonify({
+                "success": False,
+                "message": "No PDF uploaded"
+            }), 400
+
+        pdf = request.files["pdf"]
+
+        difficulty = request.form.get("difficulty", "Medium")
+        question_count = request.form.get("questionCount", "10")
+
+        text = ""
+
+        pdf_document = fitz.open(
+            stream=pdf.read(),
+            filetype="pdf"
+        )
+
+        for page in pdf_document:
+            text += page.get_text()
+
+        if not text.strip():
+            return jsonify({
+                "success": False,
+                "message": "No text found in PDF"
+            }), 400
+
+        prompt = f"""
+Generate {question_count} multiple-choice questions.
+
+STRICT FORMAT:
+
+Q1. Question text?
+A. option 1
+B. option 2
+C. option 3
+D. option 4
+Answer: B
+
+Q2. Question text?
+A. option 1
+B. option 2
+C. option 3
+D. option 4
+Answer: C
+
+Rules:
+- Difficulty: {difficulty}
+- No explanations
+- No markdown
+- No headings
+- Only questions in this format
+- Always include Answer line
+
+Notes:
+{text[:12000]}
+"""
+
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
                 {
                     "role": "user",
                     "content": prompt
@@ -926,49 +912,48 @@ Format:
             ]
         )
 
-        notes = response.choices[0].message.content
+        quiz = response.choices[0].message.content
+
+        new_quiz = Quiz(
+            title=f"{difficulty} Quiz",
+            content=quiz
+        )
+
+        db.session.add(new_quiz)
+        db.session.commit()
 
         return jsonify({
             "success": True,
-            "notes": notes
-        })
+            "quiz": quiz
+        }), 200
 
     except Exception as e:
-        print("AI FILE NOTES ERROR:", e)
+        print("QUIZ ERROR:", e)
+        traceback.print_exc()
 
         return jsonify({
             "success": False,
             "message": str(e)
         }), 500
-        }), 500
+
 
 # ==============================
-# FORGOT PASSWORD - RESET
+# LOAD SAVED QUIZZES
 # ==============================
-@app.route("/reset_password", methods=["POST"])
-def reset_password():
+@app.route("/quizzes", methods=["GET"])
+def get_quizzes():
+    quizzes = Quiz.query.order_by(Quiz.created_at.desc()).all()
 
-    data = request.get_json()
+    return jsonify([
+        {
+            "id": q.id,
+            "title": q.title,
+            "content": q.content
+        }
+        for q in quizzes
+    ]), 200
 
-    email = data.get("email")
-    new_password = data.get("new_password")
 
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        return jsonify({
-            "success": False,
-            "message": "User not found"
-        }), 404
-
-    user.password = generate_password_hash(new_password)
-
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "message": "Password reset successful"
-    }), 200
 # ==============================
 # RUN SERVER
 # ==============================
