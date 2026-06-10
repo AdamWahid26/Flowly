@@ -586,8 +586,8 @@ textarea {
                         <p id="fileNameDisplay" class="file-name-display">No file selected</p>
                     </div>
 
-                    <button type="button" class="generate-btn" onclick="generateDummyNotes()">
-                        Generate Notes
+                    <button type="button" class="generate-btn" onclick="generateNotes()">
+                     Generate Notes
                     </button>
                 </div>
 
@@ -635,6 +635,28 @@ textarea {
     </main>
 
     <script>
+// ===== APPLY SAVED THEME =====
+(function() {
+    const appearance = JSON.parse(localStorage.getItem("appearanceSettings")) || {};
+    const theme = appearance.theme || "Default Blue";
+    const fontSize = appearance.fontSize || "Medium";
+
+    if (theme === "Default Blue") {
+        document.body.style.background = "#8fb9d6";
+        document.body.style.color = "#1f2937";
+    } else if (theme === "Light") {
+        document.body.style.background = "#eaf8ff";
+        document.body.style.color = "#1f2937";
+    } else if (theme === "Dark") {
+        document.body.style.background = "#1e293b";
+        document.body.style.color = "#f8fafc";
+    }
+
+    if (fontSize === "Small") document.body.style.fontSize = "14px";
+    else if (fontSize === "Medium") document.body.style.fontSize = "16px";
+    else if (fontSize === "Large") document.body.style.fontSize = "18px";
+})();
+
 // ===== FRIEND NAVIGATION CODE =====
 
 function toggleMenu() {
@@ -683,7 +705,6 @@ let selectedSubjectIndex = null;
 function saveSubjects() {
     localStorage.setItem("subjects", JSON.stringify(subjects));
 }
-
 
 // ===== SUBJECT FUNCTIONS =====
 
@@ -948,10 +969,11 @@ function updateProgress() {
 
 // ===== GENERATE NOTES =====
 
-async function generateDummyNotes() {
+async function generateNotes() {
     const notesArea = document.getElementById("notesArea");
     const topicInput = document.getElementById("topicInput");
     const fileInput = document.getElementById("fileUpload");
+    const generateBtn = document.querySelector(".generate-btn");
 
     if (selectedSubjectIndex === null || !subjects[selectedSubjectIndex]) {
         alert("Please add or select a subject first.");
@@ -972,7 +994,9 @@ async function generateDummyNotes() {
     formData.append("topic", topic);
     formData.append("file", file);
 
-    notesArea.value = "Uploading and reading PDF...";
+    // ✅ Loading state
+    notesArea.value = "⏳ Generating notes...";
+    generateBtn.disabled = true;
 
     try {
         const response = await fetch("http://127.0.0.1:5000/generate_notes_from_file", {
@@ -982,14 +1006,28 @@ async function generateDummyNotes() {
 
         const data = await response.json();
 
+        generateBtn.disabled = false;
+
         if (data.success && data.notes) {
             notesArea.value = data.notes;
+
+            // ✅ Auto-save topic input if topic was provided
+            if (topic && subjects[selectedSubjectIndex]) {
+                if (!subjects[selectedSubjectIndex].notesByTopic) {
+                    subjects[selectedSubjectIndex].notesByTopic = {};
+                }
+                subjects[selectedSubjectIndex].notesByTopic[topic] = data.notes;
+                saveSubjects();
+                renderSavedNotesList();
+            }
+
         } else {
             notesArea.value = data.message || "AI generation failed.";
         }
 
     } catch (error) {
         console.error(error);
+        generateBtn.disabled = false;
         notesArea.value = "Error connecting to backend. Make sure Flask backend is running.";
     }
 }
