@@ -210,6 +210,7 @@
 
     <p>Enter your email and we’ll send you a reset link.</p>
 
+<<<<<<< HEAD
     <form onsubmit="resetPassword(event)">
       <input type="email" id="email" placeholder="Email" required>
       <button type="submit">Send Reset Link</button>
@@ -261,6 +262,62 @@
       }
     }
   </script>
+=======
+    if (theme === "Default Blue") {
+    document.body.style.background = "#8fb9d6";
+    document.body.style.color = "";  // reset to default
+  } else if (theme === "Light") {
+    document.body.style.background = "#eaf8ff";
+    document.body.style.color = "";  // reset to default
+  } else if (theme === "Dark") {
+    document.body.style.background = "#1e293b";
+    document.body.style.color = "";  // reset to default — cards stay dark text
+  }
+
+    if (fontSize === "Small") document.body.style.fontSize = "14px";
+    else if (fontSize === "Medium") document.body.style.fontSize = "16px";
+    else if (fontSize === "Large") document.body.style.fontSize = "18px";
+})();
+
+async function resetPassword(event) {
+  event.preventDefault();
+
+  let email = document.getElementById("email").value;
+  let message = document.getElementById("message");
+
+  message.style.color = "black";
+message.innerText = "Sending reset link...";
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/forgot_password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: email
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      message.style.color = "green";
+      message.innerText = data.message;
+    } else {
+      message.style.color = "red";
+      message.innerText = data.message;
+    }
+
+  } catch (error) {
+    console.log(error);
+
+    message.style.color = "red";
+    message.innerText = "Server error. Please try again.";
+  }
+}
+</script>
+>>>>>>> 64cd21e (Update Flowly features and pages)
 
 </body>
 </html>
