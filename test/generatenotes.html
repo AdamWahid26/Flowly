@@ -724,7 +724,96 @@ textarea {
     transform: scale(1.08);
     background: #dc2626;
 }
+/* DARK MODE FIX: keep main UI text readable/black */
+.card,
+.card h2,
+.card h3,
+.card label,
+.hero h1,
+.notes-header h2,
+.form-group label,
+.subject-card,
+.topic-card,
+.subject-card h3,
+.topic-card h3,
+.upload-box h3,
+.path-box,
+textarea,
+input,
+select,
+.profile-menu,
+.profile-menu div {
+    color: #1f2937 !important;
+}
 
+/* Keep muted text consistent */
+.muted,
+.empty-message,
+.file-name-display {
+    color: #64748b !important;
+}
+
+/* Keep white cards white even in dark mode */
+.card,
+.subject-card,
+.topic-card,
+.upload-box,
+textarea,
+input,
+select,
+.profile-menu {
+    background-color: #ffffff;
+}
+
+/* Keep input/card soft backgrounds */
+.subject-card,
+.topic-card,
+input,
+select,
+.empty-message {
+    background-color: #f8fbff !important;
+}
+
+/* Keep selected cards readable */
+.active-card {
+    background-color: #eaf8ff !important;
+    color: #1f2937 !important;
+}
+
+/* Keep navbar text normal */
+.nav-item {
+    color: #334155 !important;
+}
+
+.nav-item.active {
+    color: white !important;
+}
+
+/* Keep blue items blue */
+.flow-step,
+.status-badge,
+.selected-subject-inline,
+.secondary-btn {
+    color: #2563eb !important;
+}
+
+/* Keep primary buttons white text */
+.primary-btn,
+.primary-btn:hover,
+.danger-btn,
+.danger-btn:hover {
+    color: white !important;
+}
+
+/* Keep quiz CTA readable */
+.quiz-cta,
+.quiz-cta h3 {
+    color: white !important;
+}
+
+.quiz-cta button {
+    color: #2563eb !important;
+}
 </style>
 </head>
 
