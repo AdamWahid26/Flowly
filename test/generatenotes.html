@@ -82,49 +82,60 @@ body {
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
 }
 
+/* PROFILE - match quiz.html */
 .profile {
     position: relative;
     width: 42px;
     height: 42px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     border-radius: 50%;
     background: #eff6ff;
-    font-size: 20px;
+
+    font-size: 15px;
     cursor: pointer;
-    transition: 0.25s ease;
+
+    transition:
+        background 0.25s ease,
+        transform 0.2s ease;
 }
 
 .profile:hover {
-    background: var(--blue-soft);
+    background: #dbeafe;
     transform: scale(1.08);
 }
 
 .profile-menu {
+    font: arial;
+    border: 2px solid black;
     display: none;
     position: absolute;
     right: 0;
-    top: 35px;
-    width: 180px;
-    z-index: 10;
-    background: white;
-    border: 2px solid black;
+    top: 42px;
+
+    background: rgb(255, 255, 255);
     border-radius: 19px;
+    width: 180px;
+
     box-shadow: 7px 13px 15px -1px rgba(0, 0, 0, 0.15);
+    z-index: 999;
 }
 
 .profile-menu div {
     padding: 12px;
     cursor: pointer;
-    border-radius: 17px;
+    border-radius: 19px;
 }
 
 .profile-menu div:hover {
     background: #6fa0d0;
     color: white;
+    border-radius: 19px;
+    border: 2px solid black;
 }
-
 /* PAGE */
 .page-container {
     max-width: 1180px;
